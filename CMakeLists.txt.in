@@ -28,3 +28,4 @@ externalproject_add (
     "${CMAKE_BINARY_DIR}/prefix/include/ipmid" && cp include/ipmid/api.h
     "${CMAKE_BINARY_DIR}/prefix/include/ipmid/" LOG_DOWNLOAD ON
 )
+
