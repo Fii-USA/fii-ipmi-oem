@@ -14,22 +14,7 @@
 *                                                                               *
 ********************************************************************************/
 
-#include <ipmid/api.h>
-
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <iostream>
-#include <iomanip>
-#include <sstream>
-#include <fstream>
-
-#include <ipmid/api.hpp>
-#include <ipmid/utils.hpp>
-#include <ipmid/message.hpp>
-#include <phosphor-logging/log.hpp>
-#include <sdbusplus/message/types.hpp>
-
+#include <common.hpp>
 #include <systemcommands.hpp>
 
 namespace ipmi
@@ -83,10 +68,10 @@ ipmi::RspType<std::vector<uint8_t>> FiiSysPCIeInfo(boost::asio::yield_context yi
     
 void registerSystemFunctions()
 {
-
-    ipmi::registerHandler(ipmi::prioOemBase, ipmi::netFnOemThree, FII_CMD_SYS_PCIE_INFO, ipmi::Privilege::User,
-	FiiSysPCIeInfo);
+	std::fprintf(stderr, "Registering OEM:[0x34], Cmd:[%#04X] for Fii System OEM Commands\n", FII_CMD_SYS_PCIE_INFO);
+	ipmi::registerHandler(ipmi::prioOemBase, ipmi::netFnOemThree, FII_CMD_SYS_PCIE_INFO, ipmi::Privilege::User,
+				FiiSysPCIeInfo);
     
-    return;
+	return;
 }
 }

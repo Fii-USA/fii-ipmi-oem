@@ -8,8 +8,6 @@ set (CMAKE_CXX_STANDARD 17)
 set (CMAKE_CXX_STANDARD_REQUIRED ON)
 set (CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake ${CMAKE_MODULE_PATH})
 
-option (USING_ENTITY_MANAGER_DECORATORS
-        "Enable using EM decorators to map FRUs to entity IDs" ON)
 
 set (
     CMAKE_CXX_FLAGS
@@ -20,7 +18,7 @@ set (
 "
 )
 
-project (ampere-ipmi-oem CXX)
+project (fii-ipmi-oem CXX)
 
 add_definitions (-DBOOST_ERROR_CODE_HEADER_ONLY)
 add_definitions (-DBOOST_SYSTEM_NO_DEPRECATED)
@@ -85,7 +83,8 @@ add_custom_command(OUTPUT include/ipmi-whitelist.hpp
 add_library (fiioemcmds
              SHARED
              src/systemcommands.cpp
-             include/ipmi-whitelist.hpp)
+             src/bioscommands.cpp)
+
 set_target_properties (fiioemcmds PROPERTIES VERSION "0.1.0")
 set_target_properties (fiioemcmds PROPERTIES SOVERSION "0")
 target_link_libraries (fiioemcmds stdc++fs)
@@ -101,10 +100,10 @@ install (TARGETS fiioemcmds DESTINATION lib/ipmid-providers)
 
 target_compile_definitions (
     fiioemcmds PRIVATE
-    $<$<BOOL:${INTEL_PFR_ENABLED}>: -DINTEL_PFR_ENABLED>
-    $<$<BOOL:${BMC_VALIDATION_UNSECURE_FEATURE}>:
-    -DBMC_VALIDATION_UNSECURE_FEATURE>
-    $<$<BOOL:${MDR_V1_SUPPORT}>: -DMDR_V1_SUPPORT>
-    $<$<BOOL:${USING_ENTITY_MANAGER_DECORATORS}>:
-    -DUSING_ENTITY_MANAGER_DECORATORS>
+#    $<$<BOOL:${INTEL_PFR_ENABLED}>: -DINTEL_PFR_ENABLED>
+#    $<$<BOOL:${BMC_VALIDATION_UNSECURE_FEATURE}>:
+#    -DBMC_VALIDATION_UNSECURE_FEATURE>
+#    $<$<BOOL:${MDR_V1_SUPPORT}>: -DMDR_V1_SUPPORT>
+#    $<$<BOOL:${USING_ENTITY_MANAGER_DECORATORS}>:
+#    -DUSING_ENTITY_MANAGER_DECORATORS>
 )
