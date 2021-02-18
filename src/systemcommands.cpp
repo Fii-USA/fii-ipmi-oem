@@ -1,7 +1,7 @@
 /********************************************************************************
 *                       HON HAI Precision IND.Co., LTD.                         *
 *            Personal Computer & Enterprise Product Business Group              *
-*                      Enterprise Product Business Gro:qup                        *
+*                      Enterprise Product Business Gro:qup                      *
 *                                                                               *
 *     Copyright (c) 2010 by FOXCONN/CESBG/CABG/SRD. All rights reserved.        *
 *     All data and information contained in this document is confidential       *
@@ -17,53 +17,46 @@
 #include <common.hpp>
 #include <systemcommands.hpp>
 
+#include <stdio.h>
+
 namespace ipmi
 {
 static void registerSystemFunctions() __attribute__((constructor));
  
-/**
-* Command implementations go here.
-*
-void getPCIEinfo(std::vector<uint8_t> *rspVec)
-{
-        
-    if(PCIeInfo.empty())
-    {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-		"Error geting PCIe Info came back null"
-                );
-        ipmi::responseUnspecifiedError();
-    }
-    else
-    {
-	//Convert PCIeInfi string to byte elements
-	for (size_t i = 0; PCIeInfo.size()>i; i+=2){
-		rspVec->push_back(std::stoi(PCIeInfi.substr(i,2),NULL, 16));
-        }
-    }
-}
-*/
-
 ipmi::RspType<std::vector<uint8_t>> FiiSysPCIeInfo(boost::asio::yield_context yield)
 {
-    std::string PCIeInfo;
+	std::vector<uint8_t> rsp;
+	char buffer[128], *token;
+	uint32_t value;
+	FILE *pipe = popen(PCIEINFO_COMMAND, "r");
 
-    // Read pcie bifurcation information
-    // it return two bytes, 1st byte bifurcation, 2nd byte present pin
-    PCIeInfo = system("i2cget -y -a -f 26 0x76 0x01 i 2");
+	// Read pcie bifurcation information
+	// it return two bytes, 1st byte bifurcation, 2nd byte present pin
+	if (!pipe) throw std::runtime_error("popen() failed !!!");
+	while (fgets(buffer, sizeof(buffer), pipe) != NULL)
+	{
+		std::cerr << " Command : " << buffer << std::endl;
+	}
+	pclose(pipe);
 
-    if (PCIeInfo.empty())
-    {
-        phosphor::logging::log<phosphor::logging::level::ERR>(
-		"Fii system cmd : Error geting PCIe Info came back null"
-                );
-        ipmi::responseUnspecifiedError();
-    }
+	token = std::strtok(buffer, " ");
+	if (token == NULL)
+	{
+		phosphor::logging::log<phosphor::logging::level::ERR>(
+			"Fii system cmd : Error geting PCIe Info came back null");
+		ipmi::responseUnspecifiedError();
+	}
+	token = std::strtok(NULL, " ");
+	while (token != NULL)
+	{
+		//std::cerr << " Command token: " << token << std::endl;
+		value = std::stoul(token, nullptr, 16);
+		//std::cerr << " Command value: " << value << ":" << std::hex << value << std::endl;
+		rsp.push_back(static_cast<uint8_t>(value & 0xFF));
+		token = std::strtok(NULL, " ");
+	}
   
-    std::vector<uint8_t> rsp;
-    std::vector<uint8_t> PCIeVec;
-
-    return ipmi::responseSuccess(rsp);   
+	return ipmi::responseSuccess(rsp);   
 }
     
 void registerSystemFunctions()

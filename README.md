@@ -23,6 +23,11 @@ Response
 |0x01|0x--|Bifurcation each bit identified the slot support x16(1b) or x8(0b)
 |0x02|0x--|Present bit each bit identified PCIe adapter installed(0b) or not(1b)
 
+Example
+|# |Command |Example
+|--------|-------|----
+|1|Read the information|ipmitool 0x34 0x03    
+
 ### BIOS Related Commands (7x h)
 
 #### BIOS Boot Count 0x71
@@ -50,3 +55,10 @@ Response
 |0x01|0x--|Byte 1
 |0x02|0x--|Byte 2
 |0x03|0x--|Byte 3
+
+Example
+|# |Command |Example
+|--------|-------|----
+|1|Read the boot count|ipmitool raw 0x34 0x71 0x00   
+|2|Add the boot count by 1|ipmitool raw 0x34 0x71 0x01   
+|3|Add the boot count by index|ipmitool raw 0x34 0x71 0x01 byte0 byte1 byte2 byte3   

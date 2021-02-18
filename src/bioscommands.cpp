@@ -25,7 +25,7 @@ ipmi::RspType<std::vector<uint8_t>> FiiBIOSBootCount(boost::asio::yield_context 
 {
 	bool op;
 	std::vector<uint8_t> boot_count;
-	uint32_t counter = 0;
+	uint32_t counter = 0, ret;
 	
 	if (reqParams.empty())
 	{
@@ -40,7 +40,7 @@ ipmi::RspType<std::vector<uint8_t>> FiiBIOSBootCount(boost::asio::yield_context 
         if (!fptr.is_open())
 	{
                 std::cerr << " Fii bios cmd : file didn't exist and try to create one\n";
-                system("mkdir -p /etc/conf");
+                ret = system("mkdir -p /etc/conf");
                 std::ofstream outfile (BOOT_COUNT_FILE);
                 outfile << "0" << std::endl;
                 outfile.close();
@@ -73,7 +73,7 @@ ipmi::RspType<std::vector<uint8_t>> FiiBIOSBootCount(boost::asio::yield_context 
 			boot_count[0] += 1;
 			value = boot_count[0] + (boot_count[1] << 8) + (boot_count[2] << 16) + (boot_count[3] << 24);
 		}
-		else if (reqParams.size() == 5)
+		else if (reqParams.size() == FII_CMD_BIOS_BOOT_COUNT_LEN)
 		{
 			value = reqParams[1] + + (reqParams[2] << 8) + (reqParams[3] << 16) + (reqParams[4] << 24);
 			boot_count.clear();
