@@ -16,7 +16,7 @@
 
 #pragma once
 
-#define PCIEINFO_COMMAND "i2cget -y -a -f 32 0x76 0x01 i 2"
+#define PCIEINFO_COMMAND "i2cget -y -a -f 34 0x76 0x01 i 2"
 
 enum fii_sys_cmds
 {
