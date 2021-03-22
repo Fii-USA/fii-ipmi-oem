@@ -22,7 +22,7 @@
 namespace ipmi
 {
 static void registerSystemFunctions() __attribute__((constructor));
- 
+
 ipmi::RspType<std::vector<uint8_t>> FiiSysPCIeInfo(boost::asio::yield_context yield)
 {
 	std::vector<uint8_t> rsp;
@@ -55,16 +55,34 @@ ipmi::RspType<std::vector<uint8_t>> FiiSysPCIeInfo(boost::asio::yield_context yi
 		rsp.push_back(static_cast<uint8_t>(value & 0xFF));
 		token = std::strtok(NULL, " ");
 	}
-  
-	return ipmi::responseSuccess(rsp);   
+
+	return ipmi::responseSuccess(rsp);
 }
-    
+
+auto ipmiAppGetSystemIfCapabilities(uint8_t iface)
+    -> ipmi::RspType<uint8_t, uint8_t, uint8_t, uint8_t>
+{
+
+    // Per IPMI 2.0 spec, the input and output buffer size must be the max
+    // buffer size minus one byte to allocate space for the length byte.
+    constexpr uint8_t reserved = 0x00;
+    constexpr uint8_t support = 0b10000000;
+    constexpr uint8_t inMsgSize = 240;
+    constexpr uint8_t outMsgSize = 240;
+
+    return ipmi::responseSuccess(reserved, support,
+                                 inMsgSize, outMsgSize);
+}
+
 void registerSystemFunctions()
 {
 	std::fprintf(stderr, "Registering OEM:[0x34], Cmd:[%#04X] for Fii System OEM Commands\n", FII_CMD_SYS_PCIE_INFO);
 	ipmi::registerHandler(ipmi::prioOemBase, ipmi::netFnOemThree, FII_CMD_SYS_PCIE_INFO, ipmi::Privilege::User,
-				FiiSysPCIeInfo);
-    
+					FiiSysPCIeInfo);
+	std::fprintf(stderr, "Registering APP:[0x06], Cmd:[%#04X] for Fii System OEM Commands\n", ipmi::app::cmdGetSystemIfCapabilities);
+    ipmi::registerHandler(ipmi::prioOemBase, ipmi::netFnApp, ipmi::app::cmdGetSystemIfCapabilities, ipmi::Privilege::User,
+                          ipmiAppGetSystemIfCapabilities);
 	return;
 }
+
 }
