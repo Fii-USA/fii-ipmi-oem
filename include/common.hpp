@@ -29,4 +29,5 @@
 
 #define OP_CODE_READ	0b00
 #define OP_CODE_WRITE	0b01
+#define OP_CODE_CLEAR   0b10
 
