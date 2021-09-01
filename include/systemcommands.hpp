@@ -16,7 +16,7 @@
 
 #pragma once
 
-#define PCIEINFO_COMMAND "i2cget -y -a -f 34 0x76 0x01 i 2"
+#define PCIEINFO_REG "/sys/bus/i2c/drivers/fiicpld/34-0076/CMD01"
 
 enum fii_sys_cmds
 {
