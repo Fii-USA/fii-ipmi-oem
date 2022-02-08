@@ -14,11 +14,11 @@
 *                                                                               *
 ********************************************************************************/
 
-#include <common.hpp>
+
 #include <systemcommands.hpp>
-#include <string>
-#include <iostream>
-#include <fstream>
+#include <ipmid/api.hpp>
+#include <phosphor-logging/log.hpp>
+#include <sdbusplus/message/types.hpp>
 
 namespace ipmi
     {
@@ -27,31 +27,18 @@ namespace ipmi
     ipmi::RspType<std::vector<uint8_t>> FiiSysPCIeInfo(boost::asio::yield_context yield)
     {
         std::vector<uint8_t> rsp;
-        char *token;
+        char buffer[128], *token;
         uint32_t value;
+        FILE *pipe = popen(PCIEINFO_COMMAND, "r");
 
-        std::ifstream infile;
-        try {
-            infile.open(PCIEINFO_REG);
-        }
-        catch (const std::ifstream::failure& e) {
-            std::cerr << "Error opening/reading file" << std::endl;
-        }
-        std::stringstream strStream;
-
-        strStream << infile.rdbuf();
-        char *buffer = (char *) strStream.str().c_str();
-
-        infile.close();
-
-        while (1)   //Remove trailing white spaces
+        // Read pcie bifurcation information
+        // it return two bytes, 1st byte bifurcation, 2nd byte present pin
+        if (!pipe) throw std::runtime_error("popen() failed !!!");
+        while (fgets(buffer, sizeof(buffer), pipe) != NULL)
         {
-            int len = std::strlen(buffer);
-            if(buffer[len - 1] == ' ' || buffer[len - 1] == '\n')
-                buffer[len - 1] = '\0';
-            else
-                break;
+            std::cerr << " Command : " << buffer << std::endl;
         }
+        pclose(pipe);
 
         token = std::strtok(buffer, " ");
         if (token == NULL)
@@ -60,6 +47,7 @@ namespace ipmi
                 "Fii system cmd : Error geting PCIe Info came back null");
             ipmi::responseUnspecifiedError();
         }
+        token = std::strtok(NULL, " ");
         while (token != NULL)
         {
             //std::cerr << " Command token: " << token << std::endl;
@@ -81,5 +69,3 @@ namespace ipmi
         return;
     }
 }
-
-
